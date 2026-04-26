@@ -230,17 +230,15 @@ For a differential drive robot with a caster wheel:
 #### Hardware Implementation
 
 **3D-Printed Chassis Design:**
-- Custom-designed in CAD software (Fusion 360/TinkerCAD)
+- Custom-designed in CAD software
 - Two-layer design: lower layer for motors/battery, upper layer for Arduino/sensors
 - Integrated motor mounts for geared DC motors
-- Sensor brackets with adjustable angles
-- Cable management channels
+- Sensor brackets 
 - **Caster wheel mount** at the front of the chassis
 
 **3D-Printed Drive Wheels (2x):**
 - Diameter: 65 mm for good ground clearance
 - Width: 20 mm for stability
-- Rubber band added to circumference for traction
 - Hexagonal hub for secure motor shaft attachment
 
 **3D-Printed Caster Wheel (1x):**
