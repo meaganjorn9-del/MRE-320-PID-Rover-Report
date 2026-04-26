@@ -1,1 +1,145 @@
 # MRE-320-PID-Rover-Report
+# Wall-Following Robot with PID Control
+
+## Project Overview
+
+This project challenges students to design and build a mobile robot capable of autonomously following a wall at a fixed distance using feedback control. 
+The robot utilizes a **PID (Proportional–Integral–Derivative) controller** to adjust motor speeds and steering based on distance measurements from ultrasonic sensors. 
+The project emphasizes practical application of control theory, sensor integration, and embedded system design.
+
+**Target distance:** 30 cm from the left edge of the robot to the wall  
+**Key behaviors:** Maintain stable distance, minimal oscillation, detect front obstacles, stop or reroute as needed
+
+---
+
+## Table of Contents
+
+- [Technical Requirements](#technical-requirements)
+- [Hardware Components](#hardware-components)
+- [Engineering Problem-Solving Process](#engineering-problem-solving-process)
+  - [Step 1: Understand the Problem Context](#step-1-understand-the-problem-context)
+  - [Step 2: Apply Engineering Principles](#step-2-apply-engineering-principles)
+  - [Step 3: Formulate the Problem Mathematically](#step-3-formulate-the-problem-mathematically)
+  - [Step 4: Design and Implement the Solution](#step-4-design-and-implement-the-solution)
+  - [Step 5: Evaluate and Iterate](#step-5-evaluate-and-iterate)
+- [Critical Troubleshooting: Motor Gearbox Issue](#critical-troubleshooting-motor-gearbox-issue)
+- [Code Structure](#code-structure)
+- [PID Tuning Results](#pid-tuning-results)
+- [Lessons Learned](#lessons-learned)
+
+---
+
+## Technical Requirements
+
+| Component | Specification | Status |
+|-----------|---------------|--------|
+| Microcontroller | Arduino Uno | ✅ |
+| Motor Driver | L293D | ✅ |
+| Actuators | 2x DC motors with gearboxes | ✅ |
+| Sensors | 2x Ultrasonic sensors (HC-SR04) | ✅ |
+| Target Distance | 30 cm from robot edge | ✅ |
+| Power Source | 9V rechargeable battery | ✅ |
+| Chassis | 3D-printed custom design | ✅ |
+| Drive Wheels | 3D-printed (2x) | ✅ |
+| Caster Wheel | 3D-printed (1x) | ✅ |
+| Wheel Configuration | 3-wheel (2 driven + 1 caster) | ✅ |
+
+> ⚠️ **Note:** Original DC motors without gearboxes FAILED to meet requirements. See [Critical Troubleshooting](#critical-troubleshooting-motor-gearbox-issue) for details.
+
+---
+
+## Hardware Components
+
+### Final Configuration (Successful)
+
+| Component | Specification | Purpose |
+|-----------|---------------|---------|
+| Arduino Uno | Arduinomega | Main controller |
+| L293D Motor Driver | H-bridge IC | Direction and speed control |
+| DC Motors (x2) | With 50:1 gearboxes | Drive and steering (differential drive) |
+| Ultrasonic Sensor (Front) | HC-SR04 | Obstacle detection |
+| Ultrasonic Sensor (Left) | HC-SR04 (slanted) | Wall distance measurement |
+| Chassis | 3D-printed PLA | Mechanical platform |
+| Drive Wheels (x2) | 3D-printed PLA | Traction and movement |
+| Caster Wheel (x1) | 3D-printed with ball bearing or low-friction tip | Balance and stability (3rd wheel) |
+| Battery | 9V rechargeable (NiMH/Li-ion) | Power source |
+
+### Custom 3D-Printed Components
+
+| Component | Material | Quantity | Design Notes |
+|-----------|----------|----------|---------------|
+| Chassis | PLA | 1 | Two-layer design with motor mounts and sensor brackets |
+| Drive Wheels | PLA | 2 | Diameter: 65 mm, width: 20 mm, rubber band traction surface |
+| Caster Wheel | PLA | 1 | Omni-directional or fixed swivel design for stable 3-point contact |
+| Sensor Mounts | PLA | 2 | Adjustable brackets for front and left ultrasonic sensors |
+
+### Wheel Configuration (3-Wheel Design)
+
+The robot uses a **3-wheel configuration** for stability and simplicity:
+
+| Wheel | Type | Location | Function |
+|-------|------|----------|----------|
+| Left Drive Wheel | 3D-printed, powered | Left side, center | Propulsion and steering (differential) |
+| Right Drive Wheel | 3D-printed, powered | Right side, center | Propulsion and steering (differential) |
+| Caster Wheel | 3D-printed, free-rotating | Front or rear center | Balance, prevents tipping, allows free rotation |
+
+**Why 3 wheels instead of 4?**
+- **Static stability:** 3 points always contact the ground (no rocking)
+- **Simplified kinematics:** No wheel slipping issues common with 4-wheel skid-steer
+- **Weight distribution:** Lighter than 4-wheel designs
+- **Easy 3D printing:** Single caster wheel is simpler than matching four wheels
+
+**Caster Wheel Design:**
+- Printed in two parts: fork + wheel
+- Optional: small ball bearing inserted for smooth rotation
+- Mounted at the front of the chassis for stability during forward motion
+
+### Sensor Placement
+
+| Sensor | Location | Orientation | Purpose |
+|--------|----------|-------------|---------|
+| Front ultrasonic | Front center (3D-printed bracket) | Straight ahead | Obstacle detection (stop within 15 cm) |
+| Left ultrasonic | Left side, 5 cm from front | Slightly slanted (approx. 15°) | Wall distance measurement for PID |
+
+**Note on slanted left sensor:** The slant angle provides a "look-ahead" effect, helping the robot anticipate wall changes before they arrive. The measured distance is calibrated using `actual = measured × cos(θ)`.
+
+---
+
+## Engineering Problem-Solving Process
+
+Following the 5-step engineering methodology:
+
+### Step 1: Understand the Problem Context
+
+#### Core Objective
+Maintain a consistent lateral distance of 30 cm from a wall while moving forward autonomously.
+
+#### Sub-Problems Identified
+
+| Sub-Problem | Description | Challenge |
+|-------------|-------------|-----------|
+| **Sensing** | Measure distance to wall and front obstacles | Ultrasonic noise, reflective surfaces, slant angle calibration |
+| **Control** | Convert distance error into motor commands | Nonlinear response, PID tuning, stability |
+| **Actuation** | Implement differential drive with available motors | Torque requirements, motor asymmetry, PWM response |
+| **Mechanical Stability** | Maintain balance and ground contact | 3-wheel caster design prevents rocking |
+| **Obstacle Handling** | Prioritize safety over wall-following | State management, override logic |
+
+#### Interdisciplinary Aspects
+- **Control Engineering** – PID feedback loops, stability analysis
+- **Embedded Systems** – Real-time constraints, Arduino timing
+- **Mechanical Design** – 3D-printed chassis, 3-wheel kinematics, gearbox selection, caster wheel integration
+- **Electrical Engineering** – Power distribution (9V to 5V regulation), noise filtering
+
+---
+
+### Step 2: Apply Engineering Principles
+
+#### PID Control Theory
+
+| Term | Role | Effect |
+|------|------|--------|
+| **Proportional (Kp)** | Responds to current error | Fast response, can cause oscillation |
+| **Integral (Ki)** | Accumulates past error | Eliminates steady-state error, risk of windup |
+| **Derivative (Kd)** | Predicts future error | Dampens oscillation, sensitive to noise |
+
+#### Ultrasonic Sensing Principle
