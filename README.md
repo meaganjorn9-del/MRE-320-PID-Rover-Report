@@ -137,3 +137,127 @@ Maintain a consistent lateral distance of 30 cm from a wall while moving forward
 | **Derivative (Kd)** | Predicts future error | Dampens oscillation, sensitive to noise |
 
 #### Ultrasonic Sensing Principle
+
+A 3-reading moving average filter reduced noise by approximately 90% without adding significant lag.
+
+#### Differential Drive Logic (3-Wheel Configuration)
+
+With a caster wheel providing stability, the two driven wheels control all motion:
+
+| Command | Left Motor | Right Motor | Effect |
+|---------|------------|-------------|--------|
+| Forward | Base + correction | Base - correction | Straight or turn |
+| Reverse | - (Base + correction) | - (Base - correction) | Backward motion |
+| Stop | 0 | 0 | Halt |
+| Correction sign | + when too far | - when too far | Turn toward wall |
+
+The caster wheel rotates freely and follows the direction set by the driven wheels.
+
+#### Power Management
+
+The 9V rechargeable battery powers both the Arduino (through Vin pin, regulated to 5V) and the L293D motor driver. Proper decoupling capacitors were added to prevent motor noise from resetting the Arduino.
+
+---
+
+### Step 3: Formulate the Problem Mathematically
+
+#### Variable Definitions
+
+| Variable | Symbol | Value/Unit | Description |
+|----------|--------|------------|-------------|
+| Target distance | `r` | 30.0 cm | Desired wall distance |
+| Measured distance | `y(t)` | cm | Actual wall distance at time t |
+| Error | `e(t)` | cm | `r - y(t)` (positive = too far) |
+| Control output | `u(t)` | dimensionless | PID result (-255 to +255 scale) |
+| Sampling time | `dt` | 0.05 sec | Control loop period |
+| Base speed | `v_base` | 150 PWM | Nominal forward speed |
+
+#### PID Equation (Discrete Form)
+
+The discrete-time PID control equation is implemented in the Arduino loop with a sampling time `dt = 0.05` seconds:
+
+$$ u(t) = K_p \cdot e(t) + K_i \cdot \sum_{k=0}^{t} e(k) \cdot \Delta t + K_d \cdot \frac{e(t) - e(t-1)}{\Delta t} $$
+
+Where:
+
+| Term | Symbol | Description |
+|------|--------|-------------|
+| Control output | $u(t)$ | Motor correction value applied to left/right speeds |
+| Proportional gain | $K_p = 18$ | Responds to current error |
+| Integral gain | $K_i = 3$ | Accumulates past error (eliminates steady-state error) |
+| Derivative gain | $K_d = 40$ | Predicts future error (dampens oscillation) |
+| Error at time t | $e(t)$ | Target distance (30 cm) minus measured wall distance |
+| Previous error | $e(t-1)$ | Error from previous loop iteration |
+| Sampling time | $\Delta t = 0.05$ | Time between control loop updates (20 Hz) |
+
+**In code implementation:**
+
+- The integral term is limited using anti-windup to prevent excessive accumulation when the robot is stuck or turning sharply
+- The derivative term uses the difference between current and previous error divided by `dt`
+- The final correction is constrained to the range [-255, 255] before being added/subtracted from motor speeds
+**Final tuned gains:** Kp = 18, Ki = 3, Kd = 40
+
+#### Motor Speed Mapping
+
+$$ \text{leftSpeed} = \text{constrain}(v_{base} + u(t), 0, 255) $$
+
+$$ \text{rightSpeed} = \text{constrain}(v_{base} - u(t), 0, 255) $$
+
+The correction is **added** to the left motor and **subtracted** from the right motor so that:
+- Positive error (too far from wall) → positive correction → left motor faster, right motor slower → robot turns RIGHT toward the wall
+- Negative error (too close to wall) → negative correction → left motor slower, right motor faster → robot turns LEFT away from the wall
+
+#### Obstacle State Machine Logic
+
+$$ \text{baseSpeed} = \begin{cases} 
+150 & \text{if frontDistance} \geq 20 \text{ cm} \\
+80 & \text{if } 10 \leq \text{frontDistance} < 20 \text{ cm} \\
+0 & \text{if frontDistance} < 10 \text{ cm}
+\end{cases} $$
+
+#### 3-Wheel Kinematics
+
+For a differential drive robot with a caster wheel:
+- Instantaneous center of rotation (ICR) lies on the axis between the two driven wheels
+- Caster wheel automatically aligns with the direction of motion
+- No additional kinematic equations needed for control — the caster is passive
+
+
+---
+
+### Step 4: Design and Implement the Solution
+
+#### Hardware Implementation
+
+**3D-Printed Chassis Design:**
+- Custom-designed in CAD software (Fusion 360/TinkerCAD)
+- Two-layer design: lower layer for motors/battery, upper layer for Arduino/sensors
+- Integrated motor mounts for geared DC motors
+- Sensor brackets with adjustable angles
+- Cable management channels
+- **Caster wheel mount** at the front of the chassis
+
+**3D-Printed Drive Wheels (2x):**
+- Diameter: 65 mm for good ground clearance
+- Width: 20 mm for stability
+- Rubber band added to circumference for traction
+- Hexagonal hub for secure motor shaft attachment
+
+**3D-Printed Caster Wheel (1x):**
+- Diameter: 25-30 mm (smaller than drive wheels)
+- Swivel design or fixed low-friction tip
+- Mounted at the front center of chassis
+- Provides 3-point contact with ground (never rocks)
+
+**Why front caster vs. rear caster:**
+- Front caster placement pulls the robot during forward motion
+- Provides stability when stopping (prevents nose-diving)
+- Simplifies weight distribution (battery can be placed in rear)
+
+**Sensor Mounting:**
+- Left ultrasonic: 5 cm from front, slanted forward at approximately 15° using 3D-printed bracket
+- Front ultrasonic: Centered on front bumper bracket above caster wheel
+
+**Power Distribution (9V Rechargeable Battery):**
+
+
