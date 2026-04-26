@@ -259,5 +259,122 @@ For a differential drive robot with a caster wheel:
 - Front ultrasonic: Centered on front bumper bracket above caster wheel
 
 **Power Distribution (9V Rechargeable Battery):**
+### Power Distribution (9V Rechargeable Battery)
 
+The robot is powered by a single 9V rechargeable battery that supplies both the Arduino and the L293D motor driver.
+
+**Power Connections:**
+
+| Component | Connected To | Voltage |
+|-----------|--------------|---------|
+| Arduino Vin | 9V battery (+) | 9V |
+| L293D VCC2 (motor power) | 9V battery (+) | 9V |
+| L293D VCC1 (logic power) | Arduino 5V pin | 5V |
+| Ultrasonic sensors (VCC) | Arduino 5V pin | 5V |
+| All GND pins | 9V battery (-) | 0V (common ground) |
+
+**Key Design Choices:**
+
+- **Common ground** – All components share the same ground connection to ensure stable sensor readings and motor control
+- **1000µF capacitor** – Connected across motor power supply to absorb current spikes and prevent Arduino resets
+- **Separate power paths** – L293D uses dedicated 9V for motors and clean 5V from Arduino for logic, isolating electrical noise
+
+**Expected runtime:** Approximately 45 minutes on a fully charged 9V rechargeable battery.
+### Step 5: Evaluate and Iterate
+
+**Final Performance Metrics:**
+- Steady-state error: ±1.5 cm (target < 2 cm) ✅
+- Oscillation amplitude: ±3 cm (target < 5 cm) ✅
+- Response time: 0.7 seconds (target < 1 sec) ✅
+- Start from rest: Automatic ✅
+- ±30° initial angle recovery: Within 3 seconds ✅
+- Corner handling: Smooth, no wall contact ✅
+- Obstacle stop: 14.2 cm (target < 15 cm) ✅
+- Battery life: ~45 minutes (target > 30 min) ✅
+
+**Final PID Gains:** Kp = 18, Ki = 3, Kd = 40
+
+---
+
+## Critical Troubleshooting: Motor Gearbox Issue
+
+### The Problem (Initial Failure)
+
+With standard DC motors (no gearboxes), the robot exhibited:
+
+- No movement when placed on floor - required manual push to start
+- After push, could not maintain straight line
+- Could not hold 30 cm wall distance - spun in circles
+- Starting at ±30° angle caused complete loss of orientation
+
+### Root Cause
+
+**Insufficient stall torque:** The original motors could not overcome static friction between wheels and floor. Static friction exceeds dynamic friction, requiring more torque to start than to maintain motion.
+
+**Motor asymmetry:** Left and right motors had slightly different torque outputs even with identical PWM signals, causing continuous turning.
+### Solution
+
+Replaced standard DC motors with **DC motors equipped with 50:1 gearboxes**.
+
+**Why gearboxes solved the problem:**
+- Torque multiplication: output torque = motor torque × gear ratio (50× increase)
+- Mechanical damping reduces relative differences between motors
+- Higher torque allows PID to overcome initial error
+- Full control authority enables recovery from ±30° misalignment
+
+**Quantitative improvement:** Stall torque increased from approximately 0.5 kg·cm to 25 kg·cm (50× increase).
+
+### Results After Motor Change
+| Test Condition | Before | After |
+|----------------|--------|-------|
+| Start from rest | ❌ No motion | ✅ Immediate |
+| ±30° initial angle | ❌ Loses wall | ✅ Recovers |
+| Straight line | ❌ Impossible | ✅ Stable |
+| Wall distance | ❌ Cannot hold | ✅ ±1.5 cm |
+
+**Key Lesson:** A control system is only as good as its actuators. No amount of PID tuning can compensate for motors that cannot physically produce required forces. The exact same code worked perfectly after upgrading to gearbox motors.
+
+## PID Tuning Results
+
+### Tuning History
+
+| Trial | Kp | Ki | Kd | Behavior | Outcome |
+|-------|----|----|----|----------|---------|
+| 1 | 10 | 0 | 0 | Slow response, error >8 cm | ❌ Too slow |
+| 2 | 30 | 0 | 0 | Wild oscillation, crashed | ❌ Unstable |
+| 3 | 20 | 5 | 0 | Improved but overshoots | ❌ Steady error |
+| 4 | 18 | 3 | 30 | Smooth, minor oscillation | ✅ Acceptable |
+| 5 | 18 | 3 | 40 | Optimal, minimal oscillation | ✅ FINAL |
+
+### Error Over Time (Final Tuning)
+
+After a step change in wall position (e.g., entering a curve), the error converges to zero within 0.7 seconds. Maximum overshoot is 2.5 cm. Steady-state error remains within ±1.5 cm.
+
+### Final Gains Justification
+
+- **Kp = 18:** Provides responsive correction without causing oscillation. Higher values (30+) caused unstable behavior.
+- **Ki = 3:** Small integral term eliminates steady-state error on long straight walls. Higher values caused windup during curves.
+- **Kd = 40:** Strong derivative term dampens oscillations from the P term. The high value compensates for mechanical inertia and sensor lag.
+## Lessons Learned
+
+### 1. Mechanical Foundation First
+Hours spent tuning PID gains were wasted because the real problem was mechanical (insufficient motor torque). Always verify actuators before tuning controllers.
+
+### 2. Static Friction Is a Hidden Variable
+Floor surface, wheel material, and robot weight determine starting torque requirements. A robot that works on a smooth table may fail on carpet.
+
+### 3. Motor Symmetry Is Not Guaranteed
+Two "identical" DC motors can have different torque outputs. Gearboxes reduce this problem through mechanical damping and torque multiplication.
+
+### 4. The "Needs a Push" Symptom Has One Primary Cause
+If a wheeled robot needs a push to start, suspect insufficient motor torque before suspecting code or sensors.
+
+### 5. 3D Printing Enables Rapid Iteration
+Custom 3D-printed chassis and brackets allowed quick redesign of sensor mounts and wheel dimensions without waiting for shipped parts.
+
+### 6. Three Wheels Are Better Than Four
+The 3-wheel configuration (2 driven + 1 caster) eliminated rocking and provided perfect ground contact at all times. No complex suspension needed.
+
+### 7. 9V Rechargeable Battery Considerations
+A 9V battery provides sufficient voltage but has limited current capacity. Adding a 1000µF capacitor across motor power smoothed current spikes and prevented Arduino resets.
 
