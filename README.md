@@ -123,7 +123,7 @@ Maintain a consistent lateral distance of 30 cm from a wall while moving forward
 - **Control Engineering** – PID feedback loops, stability analysis
 - **Embedded Systems** – Real-time constraints, Arduino timing
 - **Mechanical Design** – 3D-printed chassis, 3-wheel kinematics, gearbox selection, caster wheel integration
-- **Electrical Engineering** – Power distribution (9V to 5V regulation), noise filtering
+- **Electrical Engineering** – Power distribution (7.4V to 5V regulation), noise filtering
 
 ---
 
