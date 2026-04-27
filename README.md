@@ -35,7 +35,7 @@ This project challenges students to design and build a mobile robot capable of a
 | Actuators | 2x DC motors with gearboxes | ✅ |
 | Sensors | 2x Ultrasonic sensors (HC-SR04) | ✅ |
 | Target Distance | 30 cm from robot edge | ✅ |
-| Power Source | 9V rechargeable battery | ✅ |
+| Power Source | 7.4V LiPo battery | ✅ |
 | Chassis | 3D-printed custom design | ✅ |
 | Drive Wheels | 3D-printed (2x) | ✅ |
 | Caster Wheel | 3D-printed (1x) | ✅ |
@@ -59,7 +59,7 @@ This project challenges students to design and build a mobile robot capable of a
 | Chassis | 3D-printed PLA | Mechanical platform |
 | Drive Wheels (x2) | 3D-printed PLA | Traction and movement |
 | Caster Wheel (x1) | 3D-printed with ball bearing or low-friction tip | Balance and stability (3rd wheel) |
-| Battery | 9V rechargeable (NiMH/Li-ion) | Power source |
+| Battery | 7.4V LiPo battery| Power source |
 
 ### Custom 3D-Printed Components
 
@@ -156,7 +156,7 @@ The caster wheel rotates freely and follows the direction set by the driven whee
 
 #### Power Management
 
-The 9V rechargeable battery powers both the Arduino (through Vin pin, regulated to 5V) and the L293D motor driver. Proper decoupling capacitors were added to prevent motor noise from resetting the Arduino.
+The robot is powered by a single 7.4V LiPo rechargeable battery that supplies both the Arduino and the L293D motor driver.
 
 ---
 
@@ -257,28 +257,28 @@ For a differential drive robot with a caster wheel:
 - Left ultrasonic: 5 cm from front, slanted forward at approximately 15° using 3D-printed bracket
 - Front ultrasonic: Centered on front bumper bracket above caster wheel
 
-**Power Distribution (9V Rechargeable Battery):**
-### Power Distribution (9V Rechargeable Battery)
+### Power Distribution (7.4V LiPo Battery)
 
-The robot is powered by a single 9V rechargeable battery that supplies both the Arduino and the L293D motor driver.
+The robot is powered by a single 7.4V LiPo rechargeable battery that supplies both the Arduino and the L293D motor driver.
 
 **Power Connections:**
 
 | Component | Connected To | Voltage |
 |-----------|--------------|---------|
-| Arduino Vin | 9V battery (+) | 9V |
-| L293D VCC2 (motor power) | 9V battery (+) | 9V |
+| Arduino Vin | 7.4V LiPo battery (+) | 7.4V |
+| L293D VCC2 (motor power) | 7.4V LiPo battery (+) | 7.4V |
 | L293D VCC1 (logic power) | Arduino 5V pin | 5V |
 | Ultrasonic sensors (VCC) | Arduino 5V pin | 5V |
-| All GND pins | 9V battery (-) | 0V (common ground) |
+| All GND pins | 7.4V LiPo battery (-) | 0V (common ground) |
 
 **Key Design Choices:**
 
 - **Common ground** – All components share the same ground connection to ensure stable sensor readings and motor control
 - **1000µF capacitor** – Connected across motor power supply to absorb current spikes and prevent Arduino resets
-- **Separate power paths** – L293D uses dedicated 9V for motors and clean 5V from Arduino for logic, isolating electrical noise
+- **Separate power paths** – L293D uses dedicated 7.4V for motors and clean 5V from Arduino for logic, isolating electrical noise
 
-**Expected runtime:** Approximately 45 minutes on a fully charged 9V rechargeable battery.
+**Expected runtime:** Approximately 45 minutes on a fully charged 7.4V LiPo battery (typical 1000-1500 mAh capacity).
+
 ### Step 5: Evaluate and Iterate
 
 **Final Performance Metrics:**
@@ -374,6 +374,6 @@ Custom 3D-printed chassis and brackets allowed quick redesign of sensor mounts a
 ### 6. Three Wheels Are Better Than Four
 The 3-wheel configuration (2 driven + 1 caster) eliminated rocking and provided perfect ground contact at all times. No complex suspension needed.
 
-### 7. 9V Rechargeable Battery Considerations
-A 9V battery provides sufficient voltage but has limited current capacity. Adding a 1000µF capacitor across motor power smoothed current spikes and prevented Arduino resets.
+### 7. 7.4V LiPo Battery Considerations
+The 7.4V LiPo battery provides sufficient voltage and current for both motors and Arduino. A 1000µF capacitor across the motor power supply smoothed current spikes and prevented Arduino resets.
 
