@@ -66,9 +66,9 @@ This project challenges students to design and build a mobile robot capable of a
 | Component | Material | Quantity | Design Notes |
 |-----------|----------|----------|---------------|
 | Chassis | PLA | 1 | Two-layer design with motor mounts and sensor brackets |
-| Drive Wheels | PLA | 2 | Diameter: 65 mm, width: 20 mm, rubber band traction surface |
+| Drive Wheels | PLA | 2 | Diameter: 65 mm, width: 20 mm|
 | Caster Wheel | PLA | 1 | Omni-directional or fixed swivel design for stable 3-point contact |
-| Sensor Mounts | PLA | 2 | Adjustable brackets for front and left ultrasonic sensors |
+| Sensor Mounts | PLA | 2 | brackets for front and left ultrasonic sensors |
 
 ### Wheel Configuration (3-Wheel Design)
 
