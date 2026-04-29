@@ -156,7 +156,7 @@ The caster wheel rotates freely and follows the direction set by the driven whee
 
 #### Power Management
 
-The robot is powered by a single 7.4V LiPo rechargeable battery that supplies both the Arduino and the L293D motor driver.
+The robot is powered by a single 7.4V LiPo battery that supplies both the Arduino and the L293D motor driver.
 
 ---
 
