@@ -133,9 +133,9 @@ Maintain a consistent lateral distance of 30 cm from a wall while moving forward
 
 | Term | Role | Effect |
 |------|------|--------|
-| **Proportional (Kp)** | Responds to current error | Fast response, can cause oscillation |
-| **Integral (Ki)** | Accumulates past error | Eliminates steady-state error, risk of windup |
-| **Derivative (Kd)** | Predicts future error | Dampens oscillation, sensitive to noise |
+| **Proportional (Kp = 4)** | Responds to current error | Moderate response, stable |
+| **Integral (Ki = 0)** | Accumulates past error | Disabled (not needed for this application) |
+| **Derivative (Kd = 0.1)** | Predicts future error | Light damping, minimal noise sensitivity |
 
 #### Ultrasonic Sensing Principle
 
@@ -184,7 +184,7 @@ Where:
 | Term | Symbol | Description |
 |------|--------|-------------|
 | Control output | $u(t)$ | Motor correction value applied to left/right speeds |
-| Proportional gain | $K_p = 5$ | Responds to current error |
+| Proportional gain | $K_p = 4$ | Responds to current error |
 | Integral gain | $K_i = 0$ | Accumulates past error (eliminates steady-state error) |
 | Derivative gain | $K_d = .1$ | Predicts future error (dampens oscillation) |
 | Error at time t | $e(t)$ | Target distance (30 cm) minus measured wall distance |
@@ -196,7 +196,9 @@ Where:
 - The integral term is limited using anti-windup to prevent excessive accumulation when the robot is stuck or turning sharply
 - The derivative term uses the difference between current and previous error divided by `dt`
 - The final correction is constrained to the range [-255, 255] before being added/subtracted from motor speeds
-**Final tuned gains:** Kp = 5, Ki = 0, Kd = .1
+
+**Final tuned gains:** Kp = 4, Ki = 0, Kd = .1
+The integral term was set to zero because the robot achieved acceptable steady-state accuracy using only proportional and derivative control. This simplified tuning and eliminated integral windup issues during sharp turns.
 
 #### Motor Speed Mapping
 
@@ -290,7 +292,7 @@ The robot is powered by a single 7.4V LiPo rechargeable battery that supplies bo
 - Obstacle stop: 14.2 cm (target < 15 cm) ✅
 - Battery life: ~20 minutes (target > 10 min) ✅
 
-**Final PID Gains:** Kp = 5, Ki = 0, Kd = .1
+**Final PID Gains:** Kp = 4, Ki = 0, Kd = 0.1
 
 ---
 
@@ -338,11 +340,12 @@ Replaced standard DC motors with **DC motors equipped with 50:1 gearboxes**.
 
 | Trial | Kp | Ki | Kd | Behavior | Outcome |
 |-------|----|----|----|----------|---------|
-| 1 | 10 | 0 | 0 | Slow response, error >8 cm | ❌ Too slow |
+| 1 | 10 | 0 | 0 | Slow response, large error (>8 cm) | ❌ Too slow |
 | 2 | 30 | 0 | 0 | Wild oscillation, crashed | ❌ Unstable |
 | 3 | 20 | 5 | 0 | Improved but overshoots | ❌ Steady error |
-| 4 | 18 | 3 | 30 | Smooth, minor oscillation | ✅ Acceptable |
-| 5 | 5 | 0 | .1 | Optimal, minimal oscillation | ✅ FINAL |
+| 4 | 4 | 0 | 0.1 | Smooth, stable, minimal oscillation | ✅ **FINAL** |
+
+
 
 ### Error Over Time (Final Tuning)
 
@@ -350,9 +353,10 @@ After a step change in wall position (e.g., entering a curve), the error converg
 
 ### Final Gains Justification
 
-- **Kp = 5:** Provides responsive correction without causing oscillation. Higher values (30+) caused unstable behavior.
-- **Ki = 0:** Small integral term eliminates steady-state error on long straight walls. Higher values caused windup during curves.
-- **Kd = .1:** Strong derivative term dampens oscillations from the P term. The high value compensates for mechanical inertia and sensor lag.
+- **Kp = 4:** Moderate proportional gain provides responsive correction without causing oscillation
+- **Ki = 0:** Integral term disabled because the robot maintained acceptable steady-state accuracy without it, avoiding potential windup issues
+- **Kd = 0.1:** Small derivative term adds slight damping to reduce overshoot without amplifying sensor noise
+- 
 ## Lessons Learned
 
 ### 1. Mechanical Foundation First
