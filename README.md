@@ -1,3 +1,4 @@
+# MRE-320-Rover-Report
 # Visual Documentation
 
 This section shows the physical build, wiring layout, and 3D model used for the wall following rover.
