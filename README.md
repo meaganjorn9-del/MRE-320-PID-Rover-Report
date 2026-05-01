@@ -34,6 +34,12 @@ The 3D model was created to plan the structure of the rover before assembly. It 
 
 ---
 
+## Demontration Video
+
+https://github.com/user-attachments/assets/b250e821-26ae-4757-9cbb-713104384b34
+
+---
+
 ## Visual Summary
 
 The images document the rover from design to final assembly. The 3D model shows the planned structure, the wiring diagram shows the electrical connections, and the final rover photo shows the completed build.
