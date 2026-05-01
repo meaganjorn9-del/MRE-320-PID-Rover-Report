@@ -88,7 +88,7 @@ The robot uses a **3-wheel configuration** for stability and simplicity:
 
 **Caster Wheel Design:**
 - Printed in two parts: fork + wheel
-- Optional: small ball bearing inserted for smooth rotation
+- Small ball bearing inserted for smooth rotation
 - Mounted at the front of the chassis for stability during forward motion
 
 ### Sensor Placement
@@ -184,9 +184,9 @@ Where:
 | Term | Symbol | Description |
 |------|--------|-------------|
 | Control output | $u(t)$ | Motor correction value applied to left/right speeds |
-| Proportional gain | $K_p = 18$ | Responds to current error |
-| Integral gain | $K_i = 3$ | Accumulates past error (eliminates steady-state error) |
-| Derivative gain | $K_d = 40$ | Predicts future error (dampens oscillation) |
+| Proportional gain | $K_p = 5$ | Responds to current error |
+| Integral gain | $K_i = 0$ | Accumulates past error (eliminates steady-state error) |
+| Derivative gain | $K_d = .1$ | Predicts future error (dampens oscillation) |
 | Error at time t | $e(t)$ | Target distance (30 cm) minus measured wall distance |
 | Previous error | $e(t-1)$ | Error from previous loop iteration |
 | Sampling time | $\Delta t = 0.05$ | Time between control loop updates (20 Hz) |
@@ -196,7 +196,7 @@ Where:
 - The integral term is limited using anti-windup to prevent excessive accumulation when the robot is stuck or turning sharply
 - The derivative term uses the difference between current and previous error divided by `dt`
 - The final correction is constrained to the range [-255, 255] before being added/subtracted from motor speeds
-**Final tuned gains:** Kp = 18, Ki = 3, Kd = 40
+**Final tuned gains:** Kp = 5, Ki = 0, Kd = .1
 
 #### Motor Speed Mapping
 
@@ -274,10 +274,9 @@ The robot is powered by a single 7.4V LiPo rechargeable battery that supplies bo
 **Key Design Choices:**
 
 - **Common ground** – All components share the same ground connection to ensure stable sensor readings and motor control
-- **1000µF capacitor** – Connected across motor power supply to absorb current spikes and prevent Arduino resets
-- **Separate power paths** – L293D uses dedicated 7.4V for motors and clean 5V from Arduino for logic, isolating electrical noise
 
-**Expected runtime:** Approximately 45 minutes on a fully charged 7.4V LiPo battery (typical 1000-1500 mAh capacity).
+
+**Expected runtime:** Approximately 20 minutes on a fully charged 7.4V LiPo battery (typical 350 mAh capacity).
 
 ### Step 5: Evaluate and Iterate
 
@@ -289,9 +288,9 @@ The robot is powered by a single 7.4V LiPo rechargeable battery that supplies bo
 - ±30° initial angle recovery: Within 3 seconds ✅
 - Corner handling: Smooth, no wall contact ✅
 - Obstacle stop: 14.2 cm (target < 15 cm) ✅
-- Battery life: ~45 minutes (target > 30 min) ✅
+- Battery life: ~20 minutes (target > 10 min) ✅
 
-**Final PID Gains:** Kp = 18, Ki = 3, Kd = 40
+**Final PID Gains:** Kp = 5, Ki = 0, Kd = .1
 
 ---
 
@@ -343,7 +342,7 @@ Replaced standard DC motors with **DC motors equipped with 50:1 gearboxes**.
 | 2 | 30 | 0 | 0 | Wild oscillation, crashed | ❌ Unstable |
 | 3 | 20 | 5 | 0 | Improved but overshoots | ❌ Steady error |
 | 4 | 18 | 3 | 30 | Smooth, minor oscillation | ✅ Acceptable |
-| 5 | 18 | 3 | 40 | Optimal, minimal oscillation | ✅ FINAL |
+| 5 | 5 | 0 | .1 | Optimal, minimal oscillation | ✅ FINAL |
 
 ### Error Over Time (Final Tuning)
 
@@ -351,9 +350,9 @@ After a step change in wall position (e.g., entering a curve), the error converg
 
 ### Final Gains Justification
 
-- **Kp = 18:** Provides responsive correction without causing oscillation. Higher values (30+) caused unstable behavior.
-- **Ki = 3:** Small integral term eliminates steady-state error on long straight walls. Higher values caused windup during curves.
-- **Kd = 40:** Strong derivative term dampens oscillations from the P term. The high value compensates for mechanical inertia and sensor lag.
+- **Kp = 5:** Provides responsive correction without causing oscillation. Higher values (30+) caused unstable behavior.
+- **Ki = 0:** Small integral term eliminates steady-state error on long straight walls. Higher values caused windup during curves.
+- **Kd = .1:** Strong derivative term dampens oscillations from the P term. The high value compensates for mechanical inertia and sensor lag.
 ## Lessons Learned
 
 ### 1. Mechanical Foundation First
@@ -375,5 +374,5 @@ Custom 3D-printed chassis and brackets allowed quick redesign of sensor mounts a
 The 3-wheel configuration (2 driven + 1 caster) eliminated rocking and provided perfect ground contact at all times. No complex suspension needed.
 
 ### 7. 7.4V LiPo Battery Considerations
-The 7.4V LiPo battery provides sufficient voltage and current for both motors and Arduino. A 1000µF capacitor across the motor power supply smoothed current spikes and prevented Arduino resets.
+The 7.4V LiPo battery provides sufficient voltage and current for both motors and Arduino. 
 
