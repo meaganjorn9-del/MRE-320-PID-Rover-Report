@@ -124,7 +124,10 @@ void avoidObstacle() {
 
 # How It Works
 
-1) The rover uses two DC motors, and each motor has two direction pins and one PWM-enabled speed pin that helps the motors control the speed and direction of each motor. The motorForward, motorReverse, and turnInPlace functions controls the forward, turning, reverse movement of each motor. 
+1) The rover uses two DC motors, and each motor has two direction pins and one PWM-enabled speed pin that helps the motors control the speed and direction of each motor. The motorForward, motorReverse, and turnInPlace functions controls the forward, turning, reverse movement of each motor.
+   
 2) The ultrasonic sensor provides the rover an environmental input with the detDistance function sending trigger pulses and measuring the time of the echo return, converting time into distance.
-3) The main loop implements a two-state behavior that controls when the motors should stop, turn in place, or resume forward motion. This helps the rover avoids obstacles.
+   
+3) The main loop implements a two-state behavior that controls when the motors should stop, turn in place, or resume forward motion. This helps the rover avoids obstacles. The set distance the rover should stop is 30 centimeters.
+   
 4) The system uses fixed delays to ensure consistent behavior between sensor update rates and stopping rates. The delays inside the avoidObstacle function determines how long it takes for the motors to stop once it senses an obstacle and how far it should turn in place.
