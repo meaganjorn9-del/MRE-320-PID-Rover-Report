@@ -292,6 +292,7 @@ The robot is powered by a single 7.4V LiPo rechargeable battery that supplies bo
 - Corner handling: Smooth, no wall contact ✅
 - Obstacle stop: 14.2 cm (target < 15 cm) ✅
 - Battery life: ~20 minutes (target > 10 min) ✅
+
 **Gains Justification:**
 - **Kp = 4:** Moderate proportional gain provides responsive correction without oscillation
 - **Ki = 0:** Integral disabled; steady-state error was acceptable without it
