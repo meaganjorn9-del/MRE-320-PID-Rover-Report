@@ -191,13 +191,14 @@ Where:
 | Previous error | $e(t-1)$ | Error from previous loop iteration |
 | Sampling time | $\Delta t = 0.05$ | Time between control loop updates (20 Hz) |
 
+**Final tuned gains:** Kp = 4, Ki = 0, Kd = 0.1
+
 **In code implementation:**
 
 - The integral term is limited using anti-windup to prevent excessive accumulation when the robot is stuck or turning sharply
 - The derivative term uses the difference between current and previous error divided by `dt`
 - The final correction is constrained to the range [-255, 255] before being added/subtracted from motor speeds
 
-**Final tuned gains:** Kp = 4, Ki = 0, Kd = .1
 The integral term was set to zero because the robot achieved acceptable steady-state accuracy using only proportional and derivative control. This simplified tuning and eliminated integral windup issues during sharp turns.
 
 #### Motor Speed Mapping
@@ -291,8 +292,10 @@ The robot is powered by a single 7.4V LiPo rechargeable battery that supplies bo
 - Corner handling: Smooth, no wall contact ✅
 - Obstacle stop: 14.2 cm (target < 15 cm) ✅
 - Battery life: ~20 minutes (target > 10 min) ✅
-
-**Final PID Gains:** Kp = 4, Ki = 0, Kd = 0.1
+**Gains Justification:**
+- **Kp = 4:** Moderate proportional gain provides responsive correction without oscillation
+- **Ki = 0:** Integral disabled; steady-state error was acceptable without it
+- **Kd = 0.1:** Small derivative term adds slight damping to reduce overshoot
 
 ---
 
@@ -312,6 +315,7 @@ With standard DC motors (no gearboxes), the robot exhibited:
 **Insufficient stall torque:** The original motors could not overcome static friction between wheels and floor. Static friction exceeds dynamic friction, requiring more torque to start than to maintain motion.
 
 **Motor asymmetry:** Left and right motors had slightly different torque outputs even with identical PWM signals, causing continuous turning.
+
 ### Solution
 
 Replaced standard DC motors with **DC motors equipped with 50:1 gearboxes**.
@@ -345,18 +349,19 @@ Replaced standard DC motors with **DC motors equipped with 50:1 gearboxes**.
 | 3 | 20 | 5 | 0 | Improved but overshoots | ❌ Steady error |
 | 4 | 4 | 0 | 0.1 | Smooth, stable, minimal oscillation | ✅ **FINAL** |
 
+#### Final PID Gains
+
+| Parameter | Value |
+|-----------|-------|
+| Kp | 4 |
+| Ki | 0 |
+| Kd | 0.1 |
 
 
 ### Error Over Time (Final Tuning)
 
 After a step change in wall position (e.g., entering a curve), the error converges to zero within 0.7 seconds. Maximum overshoot is 2.5 cm. Steady-state error remains within ±1.5 cm.
 
-### Final Gains Justification
-
-- **Kp = 4:** Moderate proportional gain provides responsive correction without causing oscillation
-- **Ki = 0:** Integral term disabled because the robot maintained acceptable steady-state accuracy without it, avoiding potential windup issues
-- **Kd = 0.1:** Small derivative term adds slight damping to reduce overshoot without amplifying sensor noise
-- 
 ## Lessons Learned
 
 ### 1. Mechanical Foundation First
